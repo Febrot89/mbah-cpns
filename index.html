@@ -104,11 +104,10 @@
         // KONFIGURASI SUPABASE
         // ==========================================
         const supabaseUrl = 'https://rtwviivrhiltqbtwnpp.supabase.co';
-        
-        // MASUKKAN PUBLISHABLE KEY ANDA DI SINI (Yang diawali sb_publishable_...)
         const supabaseKey = 'sb_publishable_pxyODBvMKNtx7smv7Yk_Bg_TuLLZzBf'; 
         
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        // PERBAIKAN: Nama variabel diganti menjadi supabaseClient agar tidak bentrok
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         // ==========================================
         // LOGIKA PENGECEKAN KODE
@@ -127,8 +126,8 @@
             }
 
             // Cek ke tabel 'donors' di Supabase
-            // Mencari apakah ada baris yang kolom 'code'-nya sama dengan input user
-            const { data, error } = await supabase
+            // PERBAIKAN: Menggunakan supabaseClient
+            const { data, error } = await supabaseClient
                 .from('donors')
                 .select('*')
                 .eq('code', inputKode);
