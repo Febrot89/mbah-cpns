@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Pendonasi CPNS</title>
+    <!-- Memanggil library Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .btn-donasi {
+            background-color: #ff9800;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .pesan {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .sukses { color: green; }
+        .error { color: red; }
+        
+        /* Area Konten Rahasia (Disembunyikan dari awal) */
+        #area-pendonasi {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border: 1px solid #4CAF50;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Traktir Kopi Mbah</h2>
+        <p>Dukung terus update materi CPNS-nya ya!</p>
+        
+        <!-- Ganti link ini dengan link Trakteer/Ko-fi Anda -->
+        <a href="https://trakteer.id/" target="_blank" class="btn-donasi">☕ Donasi di Sini</a>
+
+        <p style="font-size: 12px; color: gray;">Setelah donasi, Anda akan mendapatkan kode rahasia. Masukkan di bawah ini:</p>
+
+        <input type="text" id="input-kode" placeholder="Masukkan kode verifikasi...">
+        <button onclick="cekKodeDonasi()">Verifikasi Kode</button>
+        
+        <div id="pesan-error" class="pesan error"></div>
+
+        <!-- Ini adalah area khusus yang hanya muncul kalau kodenya benar -->
+        <div id="area-pendonasi">
+            <h3>🎉 Terima Kasih, Pendonasi Hebat!</h3>
+            <p>Ini adalah konten rahasia Anda (contoh: PDF Ringkasan atau Link Grup).</p>
+            <p><b>Silakan hubungi Mbah untuk klaim hadiahnya!</b></p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // KONFIGURASI SUPABASE
+        // ==========================================
+        const supabaseUrl = 'https://rtwviivrhiltqbtwnpp.supabase.co';
+        
+        // MASUKKAN PUBLISHABLE KEY ANDA DI SINI (Yang diawali sb_publishable_...)
+        const supabaseKey = 'sb_publishable_pxyODBvMKNtx7smv7Yk_Bg_TuLLZzBf'; 
+        
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // ==========================================
+        // LOGIKA PENGECEKAN KODE
+        // ==========================================
+        async function cekKodeDonasi() {
+            const inputKode = document.getElementById('input-kode').value.trim();
+            const pesanError = document.getElementById('pesan-error');
+            const areaPendonasi = document.getElementById('area-pendonasi');
+
+            // Reset pesan error
+            pesanError.innerText = '';
+
+            if (inputKode === '') {
+                pesanError.innerText = 'Kode tidak boleh kosong!';
+                return;
+            }
+
+            // Cek ke tabel 'donors' di Supabase
+            // Mencari apakah ada baris yang kolom 'code'-nya sama dengan input user
+            const { data, error } = await supabase
+                .from('donors')
+                .select('*')
+                .eq('code', inputKode);
+
+            if (error) {
+                console.error(error);
+                pesanError.innerText = 'Terjadi kesalahan sistem. Coba lagi nanti.';
+                return;
+            }
+
+            // Jika data ditemukan (panjang array > 0)
+            if (data && data.length > 0) {
+                // Sembunyikan form, tampilkan konten rahasia
+                document.getElementById('input-kode').style.display = 'none';
+                document.querySelector('button').style.display = 'none';
+                areaPendonasi.style.display = 'block';
+                pesanError.innerText = '';
+            } else {
+                // Jika kode tidak ada di database
+                pesanError.innerText = 'Kode tidak valid. Pastikan Anda sudah donasi.';
+                areaPendonasi.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
